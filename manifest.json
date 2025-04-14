@@ -3,23 +3,24 @@
   "name": "Ethereum ABI Encoder",
   "icons": [
     {
-      "src": "assets/images/favicon.ico",
+      "src": "/ethereumencoder/assets/images/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "assets/images/logo192.png",
+      "src": "/ethereumencoder/assets/images/logo192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "assets/images/android-chrome-512x512.png",
+      "src": "/ethereumencoder/assets/images/android-chrome-512x512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "/ethereumencoder/",
   "display": "standalone",
   "theme_color": "#1a1b1e",
-  "background_color": "#1a1b1e"
+  "background_color": "#1a1b1e",
+  "scope": "/ethereumencoder/"
 } 
