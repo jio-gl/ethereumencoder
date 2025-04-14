@@ -67,6 +67,37 @@ yarn dev
 5. Click "Encode" to generate the encoded data
 6. Optionally, enter a target address and click "Send Transaction" to execute the function
 
+## Deployment
+
+### GitHub Pages
+
+The application is deployed on GitHub Pages at [https://jio-gl.github.io/ethereumencoder](https://jio-gl.github.io/ethereumencoder)
+
+To deploy your own version:
+
+1. Fork this repository
+2. Update the `homepage` field in `package.json`:
+```json
+{
+  "homepage": "https://yourusername.github.io/ethereumencoder"
+}
+```
+
+3. Install dependencies:
+```bash
+yarn install
+```
+
+4. Deploy to GitHub Pages:
+```bash
+yarn deploy
+```
+
+The deployment process will:
+- Build an optimized production version
+- Push the build to the `gh-pages` branch
+- Make it available at your GitHub Pages URL
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
