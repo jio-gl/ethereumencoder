@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ethereumencoder/static/css/main.59b93a43.css",
+    "main.js": "/ethereumencoder/static/js/main.201e9330.js",
+    "index.html": "/ethereumencoder/index.html",
+    "main.59b93a43.css.map": "/ethereumencoder/static/css/main.59b93a43.css.map",
+    "main.201e9330.js.map": "/ethereumencoder/static/js/main.201e9330.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.59b93a43.css",
+    "static/js/main.201e9330.js"
+  ]
+}
