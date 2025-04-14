@@ -1,13 +1,13 @@
 {
   "files": {
-    "main.css": "/ethereumencoder/static/css/main.59b93a43.css",
-    "main.js": "/ethereumencoder/static/js/main.8c40c6a5.js",
+    "main.css": "/ethereumencoder/static/css/main.d7fe8a68.css",
+    "main.js": "/ethereumencoder/static/js/main.74d57da6.js",
     "index.html": "/ethereumencoder/index.html",
-    "main.59b93a43.css.map": "/ethereumencoder/static/css/main.59b93a43.css.map",
-    "main.8c40c6a5.js.map": "/ethereumencoder/static/js/main.8c40c6a5.js.map"
+    "main.d7fe8a68.css.map": "/ethereumencoder/static/css/main.d7fe8a68.css.map",
+    "main.74d57da6.js.map": "/ethereumencoder/static/js/main.74d57da6.js.map"
   },
   "entrypoints": [
-    "static/css/main.59b93a43.css",
-    "static/js/main.8c40c6a5.js"
+    "static/css/main.d7fe8a68.css",
+    "static/js/main.74d57da6.js"
   ]
 }
