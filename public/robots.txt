@@ -3,4 +3,4 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://multiguard.app/sitemap.xml 
+Sitemap: https://ethereumencoder.com/sitemap.xml 
