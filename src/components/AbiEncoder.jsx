@@ -855,6 +855,9 @@ const AbiEncoder = () => {
   const [includeEthValue, setIncludeEthValue] = useState(false);
   const [ethValue, setEthValue] = useState('');
   const [ethValueDecimals, setEthValueDecimals] = useState(18);
+  const [tokenDecimals, setTokenDecimals] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [readError, setReadError] = useState(null);
 
   // Connect to wallet
   const connectWallet = async () => {
@@ -1397,10 +1400,10 @@ const AbiEncoder = () => {
     return funcFragment?.stateMutability === 'view' || funcFragment?.stateMutability === 'pure';
   };
 
-  // Add function to call read functions
+  // Update the callReadFunction to ensure result is properly processed
   const callReadFunction = async () => {
-    if (!targetAddress || !encodedData) {
-      toast.error('Please encode the function call and provide a target address', {
+    if (!targetAddress || !selectedFunction) {
+      toast.error('Please select a function and provide a target address', {
         style: {
           background: '#333',
           color: '#fff',
@@ -1410,77 +1413,138 @@ const AbiEncoder = () => {
       });
       return;
     }
-
+    
     try {
-      // Use Ethereum mainnet provider
+      setIsLoading(true);
+      setReadError(null);
+      setReadResult(null);
+      
       const provider = new ethers.JsonRpcProvider('https://eth.llamarpc.com');
       
-      const contract = new ethers.Contract(
-        targetAddress,
-        isAdvancedMode ? JSON.parse(customAbi) : STANDARD_ABIS[selectedStandard],
-        provider
-      );
-
-      const funcFragment = functionInputs.find(f => f.name === selectedFunction);
-      if (!funcFragment) {
-        throw new Error('Selected function not found in ABI');
-      }
-
-      const params = funcFragment.inputs.map(input => inputValues[input.name] || '0');
+      // Get the function definition
+      const selectedFuncDef = functionInputs.find(f => f.name === selectedFunction);
+      if (!selectedFuncDef) throw new Error('Function not found in ABI');
       
-      console.log('Calling contract:', {
-        address: targetAddress,
-        function: selectedFunction,
-        params: params
-      });
-
-      const result = await contract[selectedFunction](...params);
+      // Create contract instance with the appropriate ABI
+      const abi = isAdvancedMode ? JSON.parse(customAbi) : STANDARD_ABIS[selectedStandard];
+      const contract = new ethers.Contract(targetAddress, abi, provider);
       
-      // Format the result if it's a bigint
-      let formattedResult = result;
-      if (typeof result === 'bigint') {
-        formattedResult = result.toString();
+      // Process input values
+      const processedInputs = [];
+      
+      for (const input of selectedFuncDef.inputs) {
+        if (isArrayType(input.type)) {
+          // Handle array inputs
+          const values = inputValues[input.name] || [];
+          processedInputs.push(values);
+        } else {
+          // Handle single value inputs
+          const value = inputValues[input.name] || '';
+          processedInputs.push(value);
+        }
       }
       
-      setReadResult(formattedResult);
+      console.log(`Calling read function: ${selectedFunction} with inputs:`, processedInputs);
       
-      toast.success('Function call successful!', {
-        style: {
-          background: '#333',
-          color: '#fff',
-          borderRadius: '10px',
-          border: '1px solid #444',
-        },
-      });
+      // Call the function
+      const result = await contract[selectedFunction](...processedInputs);
+      console.log('Raw result from contract call:', result);
+      
+      // Set the result state
+      setReadResult(result);
+      
+      // If this is an ERC20 token, try to fetch decimals
+      if (['balanceOf', 'allowance', 'totalSupply'].includes(selectedFunction) && 
+          tokenDecimals === null) {
+        fetchTokenDecimals();
+      }
+      
     } catch (error) {
-      console.error('Error calling read function:', error);
-      toast.error(`Error: ${error.message}`, {
-        style: {
-          background: '#333',
-          color: '#fff',
-          borderRadius: '10px',
-          border: '1px solid #444',
-        },
-      });
+      console.error('Read function error:', error);
+      setReadError(parseExecutionError(error));
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Helper function to format the read result for display
+  // Add function to fetch token decimals
+  const fetchTokenDecimals = async () => {
+    if (!targetAddress) return;
+    
+    try {
+      const provider = new ethers.JsonRpcProvider('https://eth.llamarpc.com');
+      
+      // Create a minimal interface for decimals() function
+      const minimalABI = [
+        {
+          "constant": true,
+          "inputs": [],
+          "name": "decimals",
+          "outputs": [{"name": "", "type": "uint8"}],
+          "payable": false,
+          "stateMutability": "view",
+          "type": "function"
+        }
+      ];
+      
+      const contract = new ethers.Contract(
+        targetAddress,
+        minimalABI,
+        provider
+      );
+      
+      const decimals = await contract.decimals();
+      console.log('Detected token decimals:', Number(decimals));
+      setTokenDecimals(Number(decimals));
+      setReadResultDecimals(Number(decimals));
+    } catch (error) {
+      console.error('Error fetching token decimals:', error);
+      
+      // Special handling for known tokens
+      if (targetAddress.toLowerCase() === '0xdac17f958d2ee523a2206206994597c13d831ec7'.toLowerCase()) {
+        // USDT has 6 decimals
+        console.log('Using 6 decimals for USDT');
+        setTokenDecimals(6);
+        setReadResultDecimals(6);
+      } else {
+        // Default to 18 decimals if unable to fetch
+        setTokenDecimals(18);
+        setReadResultDecimals(18);
+      }
+    }
+  };
+
+  // Add effect to fetch decimals when target address changes
+  useEffect(() => {
+    fetchTokenDecimals();
+  }, [targetAddress]);
+
+  // Update formatReadResult function with debugging
   const formatReadResult = (result) => {
     if (result === null || result === undefined) return 'null';
     
     if (Array.isArray(result)) {
-      // Handle array results
       return `[${result.map(item => formatReadResult(item)).join(', ')}]`;
     } else if (typeof result === 'bigint') {
-      // Handle bigint results with decimal formatting
       try {
-        return `${formatValue(result, readResultDecimals)} (raw: ${result.toString()})`;
+        const selectedFuncDef = functionInputs.find(f => f.name === selectedFunction);
+        const isTokenNumericFunction = selectedFuncDef?.name && 
+          ['balanceOf', 'allowance', 'totalSupply'].includes(selectedFuncDef.name);
+        
+        // Always try to format token numeric values
+        const decimals = tokenDecimals !== null ? tokenDecimals : readResultDecimals;
+        console.log('Formatting with decimals:', decimals);
+        console.log('Raw value:', result.toString());
+        
+        const formattedValue = ethers.formatUnits(result, decimals);
+        console.log('Formatted value:', formattedValue);
+
+        return formattedValue;
       } catch (error) {
+        console.error('Error in formatReadResult:', error);
         return result.toString();
       }
     } else if (typeof result === 'object') {
-      // Handle object results (structs)
       return JSON.stringify(result, (_, v) => 
         typeof v === 'bigint' ? v.toString() : v
       , 2);
@@ -1489,13 +1553,37 @@ const AbiEncoder = () => {
     return result.toString();
   };
 
-  // Helper function to get raw value from result
+  // Update getRawValue function
   const getRawValue = (result) => {
     if (result === null || result === undefined) return 'null';
     if (typeof result === 'bigint') {
-      return result.toString();
+      const selectedFuncDef = functionInputs.find(f => f.name === selectedFunction);
+      const isTokenNumericFunction = selectedFuncDef?.name && 
+        ['balanceOf', 'allowance', 'totalSupply'].includes(selectedFuncDef.name);
+
+      if (isTokenNumericFunction && selectedStandard === 'ERC20 - Token Standard') {
+        return result.toString();
+      }
     }
     return result.toString();
+  };
+
+  // Update getFormattedValueForCopy function
+  const getFormattedValueForCopy = (result) => {
+    if (result === null || result === undefined) return 'null';
+    
+    const selectedFuncDef = functionInputs.find(f => f.name === selectedFunction);
+    const isTokenNumericFunction = selectedFuncDef?.name && 
+      ['balanceOf', 'allowance', 'totalSupply'].includes(selectedFuncDef.name);
+
+    if (typeof result === 'bigint') {
+      // Always format big numbers with appropriate decimals
+      const decimals = tokenDecimals !== null ? tokenDecimals : readResultDecimals;
+      console.log('Copy formatting with decimals:', decimals);
+      return ethers.formatUnits(result, decimals);
+    }
+    
+    return formatReadResult(result);
   };
 
   // Add this before the return statement
@@ -1953,20 +2041,49 @@ const AbiEncoder = () => {
         </div>
 
         {/* Read Function Result */}
-        {readResult !== null && (
+        {isLoading ? (
+          <div className="mb-6">
+            <h3 className="text-xl mb-4 text-blue-400">Reading from Contract...</h3>
+            <div className="bg-gray-800 border border-gray-700 rounded p-4 flex justify-center items-center">
+              <div className="animate-spin h-8 w-8 border-t-2 border-b-2 border-blue-500 rounded-full"></div>
+            </div>
+          </div>
+        ) : readError ? (
+          <div className="mb-6">
+            <h3 className="text-xl mb-4 text-red-400">Error</h3>
+            <div className="bg-gray-800 border border-red-700 rounded p-4 font-mono text-red-400">
+              {readError}
+            </div>
+          </div>
+        ) : readResult !== null && (
           <div className="mb-6">
             <h3 className="text-xl mb-4 text-blue-400">Read Result</h3>
             <div className="bg-gray-800 border border-gray-700 rounded p-4 font-mono relative group">
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-start gap-2">
-                  <pre className="whitespace-pre-wrap break-all text-sm">
-                    {formatReadResult(readResult)}
-                  </pre>
+                  <div className="flex flex-col gap-2 w-full">
+                    <div className="whitespace-pre-wrap break-all text-sm">
+                      <div className="text-lg">
+                        {formatReadResult(readResult)}
+                      </div>
+                      {typeof readResult === 'bigint' && (
+                        <div className="text-xs text-gray-400 mt-2">
+                          Raw: {readResult.toString()}
+                        </div>
+                      )}
+                      {typeof readResult === 'bigint' && tokenDecimals !== null && (
+                        <div className="text-xs text-gray-400">
+                          Using {tokenDecimals} decimals
+                        </div>
+                      )}
+                    </div>
+                  </div>
                   <div className="flex gap-2">
                     <button
                       onClick={() => {
-                        const formattedResult = formatReadResult(readResult);
+                        const formattedResult = getFormattedValueForCopy(readResult);
                         navigator.clipboard.writeText(formattedResult);
+                        console.log('Copied formatted value:', formattedResult);
                         toast.success('Formatted result copied!', {
                           style: {
                             background: '#333',
@@ -1989,8 +2106,9 @@ const AbiEncoder = () => {
                     </button>
                     <button
                       onClick={() => {
-                        const rawValue = getRawValue(readResult);
+                        const rawValue = typeof readResult === 'bigint' ? readResult.toString() : readResult.toString();
                         navigator.clipboard.writeText(rawValue);
+                        console.log('Copied raw value:', rawValue);
                         toast.success('Raw value copied!', {
                           style: {
                             background: '#333',
@@ -2018,13 +2136,24 @@ const AbiEncoder = () => {
                     <label className="text-sm text-gray-400">Decimals:</label>
                     <select
                       value={readResultDecimals}
-                      onChange={(e) => setReadResultDecimals(parseInt(e.target.value))}
+                      onChange={(e) => {
+                        const decimals = parseInt(e.target.value);
+                        console.log('Changed decimals to:', decimals);
+                        setReadResultDecimals(decimals);
+                      }}
                       className="bg-gray-900 border border-gray-700 text-white rounded p-1 text-sm"
                     >
                       {[0, 6, 8, 18].map(d => (
                         <option key={d} value={d}>{d}</option>
                       ))}
                     </select>
+                    <button 
+                      onClick={() => fetchTokenDecimals()}
+                      className="bg-blue-600 text-white px-2 py-1 rounded text-xs"
+                      title="Detect token decimals"
+                    >
+                      Auto-detect
+                    </button>
                   </div>
                 )}
               </div>
