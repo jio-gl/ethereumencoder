@@ -7,27 +7,45 @@
     <meta name="theme-color" content="#1a1b1e" />
     <meta
       name="description"
-      content="Professional Ethereum Smart Contract ABI Encoder - Encode and decode smart contract interactions with ease. Free, secure, and open-source tool for Web3 developers."
+      content="Free Ethereum Smart Contract ABI Encoder & Decoder. Easily encode function calls, decode transaction data, and interact with smart contracts. Built for Web3 developers, auditors, and blockchain engineers. Try it now!"
     />
-    <meta name="keywords" content="ethereum, abi encoder, smart contracts, web3, blockchain, ethereum development, contract interaction, function encoding, blockchain development, ethereum tools, web3 security, solidity, dapp development, ethereum interface, contract deployment" />
+    <meta name="keywords" content="ethereum, abi encoder, smart contracts, web3, blockchain, ethereum development, contract interaction, function encoding, blockchain development, ethereum tools, web3 security, solidity, dapp development, ethereum interface, contract deployment, transaction decoder" />
     <meta name="author" content="EthereumEncoder" />
+    <meta name="application-name" content="EthereumEncoder" />
+    <meta name="subject" content="Ethereum Development Tools" />
+    <meta name="classification" content="Development/Blockchain/Ethereum" />
+    <meta name="rating" content="General" />
     <meta name="robots" content="index, follow" />
     <meta name="googlebot" content="index, follow" />
     <meta name="canonical" content="https://ethereumencoder.com" />
+    
+    <!-- Language Alternatives -->
+    <link rel="alternate" hreflang="en" href="https://ethereumencoder.com" />
+    <link rel="alternate" hreflang="x-default" href="https://ethereumencoder.com" />
+    
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/assets/images/apple-touch-icon.png" />
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>Ethereum ABI Encoder | Professional Smart Contract Interaction Tool</title>
 
     <!-- Social Media Meta Tags -->
     <meta property="og:title" content="Ethereum ABI Encoder | Professional Smart Contract Tool" />
-    <meta property="og:description" content="Professional Ethereum Smart Contract ABI Encoder - Encode and decode smart contract interactions with ease. Free, secure, and open-source tool for Web3 developers." />
+    <meta property="og:description" content="Free Ethereum Smart Contract ABI Encoder & Decoder. Easily encode function calls, decode transaction data, and interact with smart contracts. Built for Web3 developers." />
     <meta property="og:image" content="https://ethereumencoder.com/assets/images/social-preview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Ethereum ABI Encoder Interface Screenshot" />
     <meta property="og:url" content="https://ethereumencoder.com" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="EthereumEncoder" />
+    
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Ethereum ABI Encoder | Professional Smart Contract Tool" />
-    <meta name="twitter:description" content="Professional Ethereum Smart Contract ABI Encoder - Free tool for Web3 developers" />
+    <meta name="twitter:description" content="Free Ethereum Smart Contract ABI Encoder & Decoder. Built for Web3 developers." />
     <meta name="twitter:image" content="https://ethereumencoder.com/assets/images/social-preview.png" />
     <meta name="twitter:site" content="@ethereumencoder" />
 
@@ -35,17 +53,76 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
+      "@type": "SoftwareApplication",
       "name": "Ethereum ABI Encoder",
-      "description": "Professional Ethereum Smart Contract ABI Encoder - Encode and decode smart contract interactions with ease.",
-      "url": "https://ethereumencoder.com",
       "applicationCategory": "DevelopmentTool",
       "operatingSystem": "Any",
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD"
-      }
+      },
+      "author": {
+        "@type": "Organization",
+        "name": "EthereumEncoder",
+        "url": "https://ethereumencoder.com"
+      },
+      "description": "Professional Ethereum Smart Contract ABI Encoder for encoding and decoding smart contract interactions",
+      "browserRequirements": "Requires JavaScript. Compatible with all modern browsers",
+      "softwareVersion": "1.0.0",
+      "keywords": "ethereum, smart contracts, abi encoder, web3, blockchain development",
+      "sameAs": [
+        "https://github.com/jio-gl/ethereumencoder"
+      ]
+    }
+    </script>
+
+    <!-- FAQ Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [{
+        "@type": "Question",
+        "name": "What is an Ethereum ABI Encoder?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "An Ethereum ABI Encoder is a tool that helps developers encode function calls and decode data for Ethereum smart contract interactions. It's essential for interacting with smart contracts on the Ethereum blockchain."
+        }
+      }, {
+        "@type": "Question",
+        "name": "Is EthereumEncoder free to use?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, EthereumEncoder is completely free and open-source. You can use it to encode and decode smart contract interactions without any cost."
+        }
+      }, {
+        "@type": "Question",
+        "name": "What can I do with EthereumEncoder?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can encode smart contract function calls, decode transaction data, and generate ABI-compliant interaction data for Ethereum smart contracts. It's perfect for developers, auditors, and blockchain engineers."
+        }
+      }]
+    }
+    </script>
+
+    <!-- Breadcrumb Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://ethereumencoder.com"
+      }, {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Documentation",
+        "item": "https://ethereumencoder.com/docs"
+      }]
     }
     </script>
 
@@ -76,5 +153,21 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+
+    <!-- SEO Content (Hidden from view but available to search engines) -->
+    <div style="display: none;" aria-hidden="true">
+      <section>
+        <h1>Ethereum ABI Encoder & Decoder</h1>
+        <h2>Professional Smart Contract Interaction Tool</h2>
+        <p>Encode Ethereum smart contract function calls and decode transaction data with our free, professional-grade ABI encoder. Built for blockchain developers, smart contract auditors, and Web3 engineers.</p>
+        <ul>
+          <li>Encode smart contract function calls</li>
+          <li>Decode transaction data</li>
+          <li>Verify contract interactions</li>
+          <li>Support for all Ethereum data types</li>
+          <li>Free and open-source tool</li>
+        </ul>
+      </section>
+    </div>
   </body>
 </html> 

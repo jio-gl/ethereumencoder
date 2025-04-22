@@ -1412,17 +1412,37 @@ const AbiEncoder = () => {
     }
 
     try {
+      // Use Ethereum mainnet provider
+      const provider = new ethers.JsonRpcProvider('https://eth.llamarpc.com');
+      
       const contract = new ethers.Contract(
         targetAddress,
         isAdvancedMode ? JSON.parse(customAbi) : STANDARD_ABIS[selectedStandard],
-        provider || new ethers.JsonRpcProvider('http://localhost:8545')
+        provider
       );
 
       const funcFragment = functionInputs.find(f => f.name === selectedFunction);
-      const params = funcFragment.inputs.map(input => inputValues[input.name]);
+      if (!funcFragment) {
+        throw new Error('Selected function not found in ABI');
+      }
+
+      const params = funcFragment.inputs.map(input => inputValues[input.name] || '0');
       
+      console.log('Calling contract:', {
+        address: targetAddress,
+        function: selectedFunction,
+        params: params
+      });
+
       const result = await contract[selectedFunction](...params);
-      setReadResult(result);
+      
+      // Format the result if it's a bigint
+      let formattedResult = result;
+      if (typeof result === 'bigint') {
+        formattedResult = result.toString();
+      }
+      
+      setReadResult(formattedResult);
       
       toast.success('Function call successful!', {
         style: {
@@ -1452,8 +1472,8 @@ const AbiEncoder = () => {
     if (Array.isArray(result)) {
       // Handle array results
       return `[${result.map(item => formatReadResult(item)).join(', ')}]`;
-    } else if (typeof result === 'object' && result._isBigNumber) {
-      // Handle BigNumber results with decimal formatting
+    } else if (typeof result === 'bigint') {
+      // Handle bigint results with decimal formatting
       try {
         return `${formatValue(result, readResultDecimals)} (raw: ${result.toString()})`;
       } catch (error) {
@@ -1464,13 +1484,6 @@ const AbiEncoder = () => {
       return JSON.stringify(result, (_, v) => 
         typeof v === 'bigint' ? v.toString() : v
       , 2);
-    } else if (typeof result === 'bigint') {
-      // Handle bigint results with decimal formatting
-      try {
-        return `${formatValue(result, readResultDecimals)} (raw: ${result.toString()})`;
-      } catch (error) {
-        return result.toString();
-      }
     }
     
     return result.toString();
@@ -1479,9 +1492,6 @@ const AbiEncoder = () => {
   // Helper function to get raw value from result
   const getRawValue = (result) => {
     if (result === null || result === undefined) return 'null';
-    if (typeof result === 'object' && result._isBigNumber) {
-      return result.toString();
-    }
     if (typeof result === 'bigint') {
       return result.toString();
     }
@@ -2003,7 +2013,7 @@ const AbiEncoder = () => {
                     </button>
                   </div>
                 </div>
-                {(typeof readResult === 'bigint' || (typeof readResult === 'object' && readResult._isBigNumber)) && (
+                {(typeof readResult === 'bigint') && (
                   <div className="flex items-center gap-2 mt-2">
                     <label className="text-sm text-gray-400">Decimals:</label>
                     <select
